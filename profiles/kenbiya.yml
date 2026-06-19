@@ -1,0 +1,118 @@
+name: "kenbiya"
+description: "Kenbiya authorized property exporter profile"
+login_url: "https://www.kenbiya.com/app/exe/login"
+allowed_domains:
+  - "www.kenbiya.com"
+  - "kenbiya.com"
+
+credential_env:
+  username: "KENBIYA_EMAIL"
+  password: "KENBIYA_PASSWORD"
+
+start_urls:
+  - "https://www.kenbiya.com/REPLACE_WITH_AUTHORIZED_SEARCH_RESULT_URL"
+
+browser:
+  headless: true
+  navigation_timeout_ms: 45000
+  user_agent: null
+
+rate_limit:
+  request_delay_seconds: 5.0
+  request_jitter_seconds: 3.0
+  max_retries: 3
+
+limits:
+  max_pages: 100
+  max_items: null
+  save_html: false
+
+robots:
+  enabled: true
+  user_agent: "AuthorizedWebDataExporter"
+  check_login_url: true
+  enforce: true
+  fail_closed_on_error: false
+  report_path: "robots_report.txt"
+
+login_selectors:
+  username:
+    - "input[type='email']"
+    - "input[name='email']"
+    - "input[name='mail']"
+    - "input[name='login_id']"
+    - "input[id*='email']"
+    - "input[id*='mail']"
+    - "input[id*='login']"
+  password:
+    - "input[type='password']"
+    - "input[name='password']"
+    - "input[name='passwd']"
+    - "input[id*='password']"
+    - "input[id*='passwd']"
+  submit:
+    - "button[type='submit']"
+    - "input[type='submit']"
+    - "button:has-text('ログイン')"
+    - "input[value*='ログイン']"
+  logged_in:
+    - "a[href*='logout']"
+    - "text=ログアウト"
+    - "text=マイページ"
+    - "text=会員メニュー"
+
+challenge_keywords:
+  - "captcha"
+  - "recaptcha"
+  - "認証コード"
+  - "二段階"
+  - "ワンタイム"
+  - "画像認証"
+
+discovery:
+  detail_link_selectors:
+    - "a[href*='bukken']"
+    - "a[href*='property']"
+    - "a[href*='detail']"
+    - "a[href*='sale']"
+  detail_url_regexes:
+    - "/(?:bukken|property|detail|sale)[^\"'#? ]*"
+    - "/app/exe/[^\"'#? ]*(?:bukken|property|detail|sale)[^\"'#? ]*"
+  next_page_selectors:
+    - "a[rel='next']"
+    - "a:has-text('次へ')"
+    - "a:has-text('次')"
+    - "a:has-text('>')"
+  next_texts:
+    - "次"
+    - "次へ"
+    - "次のページ"
+    - ">"
+    - "›"
+    - "»"
+
+extraction:
+  title_selectors:
+    - "h1"
+    - "h2"
+    - "meta[property='og:title']"
+    - "title"
+  fields:
+    - name: "price"
+      labels: ["価格", "販売価格", "物件価格", "税込価格"]
+    - name: "gross_yield"
+      labels: ["利回り", "表面利回り", "想定利回り"]
+    - name: "address"
+      labels: ["所在地", "住所", "所在地詳細"]
+    - name: "station"
+      labels: ["交通", "最寄り", "駅"]
+    - name: "property_type"
+      labels: ["物件種別", "種別", "種類"]
+    - name: "building_area"
+      labels: ["建物面積", "専有面積", "延床面積"]
+    - name: "land_area"
+      labels: ["土地面積", "敷地面積"]
+    - name: "structure"
+      labels: ["構造"]
+    - name: "built_year"
+      labels: ["築年月", "築年数", "竣工", "築"]
