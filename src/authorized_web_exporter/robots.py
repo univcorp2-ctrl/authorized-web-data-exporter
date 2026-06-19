@@ -131,8 +131,7 @@ class RobotsInspector:
         snapshot = self.ensure_loaded(url)
         if snapshot.error and snapshot.status != "HTTP 404":
             allowed = not self.fail_closed_on_error
-            reason = f"robots fetch error: {snapshot.error}"
-            decision = RobotsDecision(url=url, allowed=allowed, reason=reason)
+            decision = RobotsDecision(url=url, allowed=allowed, reason=f"robots fetch error: {snapshot.error}")
             self.decisions.append(decision)
             return decision
 
