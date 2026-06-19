@@ -113,29 +113,13 @@ flowchart TD
 ```text
 .
 ├── profiles/
-│   ├── kenbiya.yml             # Kenbiya用サイトプロファイル
-│   └── example-site.yml        # 他サイト流用テンプレート
+│   ├── kenbiya.yml
+│   └── example-site.yml
 ├── src/authorized_web_exporter/
-│   ├── cli.py                  # CLI入口
-│   ├── config.py               # YAMLプロファイル読み込み
-│   ├── crawler.py              # Playwright巡回本体
-│   ├── parser.py               # 汎用HTML抽出
-│   ├── robots.py               # robots.txt取得・解析・判定・レポート
-│   ├── checkpoint.py           # 再開用状態保存
-│   ├── storage.py              # CSV/Excel/JSONL/TXT出力
-│   └── models.py               # データモデル
 ├── scripts/
-│   └── build_runtime_profile.py # GitHub Actions入力からプロファイル生成
 ├── docs/
-│   ├── architecture.md
-│   ├── setup.md
-│   ├── robots.md
-│   ├── gpt-image-guidance-prompt.md
-│   └── assets/architecture-overview.svg
 ├── tests/
 ├── .github/workflows/
-│   ├── ci.yml
-│   └── export.yml
 └── .devcontainer/
 ```
 
@@ -174,17 +158,17 @@ start_urls:
 web-export export --profile profiles/kenbiya.yml --output-dir outputs --acknowledge-authorization
 ```
 
-ヘッドレスを切って挙動を見る場合:
+robots.txtだけ確認する場合:
 
 ```bash
-web-export export --profile profiles/kenbiya.yml --headed --acknowledge-authorization
+web-export robots --profile profiles/kenbiya.yml --url https://www.kenbiya.com/app/exe/login
 ```
 
 ---
 
-## すぐ使う方法: GitHub Actions artifactで取得
+## GitHub Actionsで取得
 
-GitHub上で自動実行する場合、リポジトリの `Settings > Secrets and variables > Actions > New repository secret` で以下を保存します。
+Repository Secretsに以下を保存します。
 
 | Secret名 | 値 |
 |---|---|
@@ -192,7 +176,7 @@ GitHub上で自動実行する場合、リポジトリの `Settings > Secrets an
 | `KENBIYA_PASSWORD` | 健美家ログインパスワード |
 | `WEB_EXPORT_ACKNOWLEDGE_AUTHORIZED` | `true` |
 
-その後、`Actions > Authorized Web Export > Run workflow` を開き、`start_urls` に検索結果URLを1行ずつ入力して実行します。完了後、artifact `authorized-web-export-outputs` からCSV/Excel/JSON/TXT/robots_reportを取得できます。
+`Actions > Authorized Web Export > Run workflow` を開き、`start_urls` に検索結果URLを1行ずつ入力して実行します。完了後、artifact `authorized-web-export-outputs` からCSV/Excel/JSON/TXT/robots_reportを取得できます。
 
 ---
 
@@ -224,34 +208,6 @@ Kenbiyaのログインページについては、ChatGPTの確認環境ではペ
 
 ---
 
-## コマンド例
-
-```bash
-web-export export \
-  --profile profiles/kenbiya.yml \
-  --output-dir outputs \
-  --max-pages 100 \
-  --max-items 1000 \
-  --acknowledge-authorization
-```
-
-開始URLをコマンドラインで追加する場合:
-
-```bash
-web-export export \
-  --profile profiles/kenbiya.yml \
-  --start-url "https://www.kenbiya.com/..." \
-  --acknowledge-authorization
-```
-
-robots.txtだけ確認する場合:
-
-```bash
-web-export robots --profile profiles/kenbiya.yml --url https://www.kenbiya.com/app/exe/login
-```
-
----
-
 ## 出力ファイル
 
 | ファイル | 内容 |
@@ -271,9 +227,6 @@ web-export robots --profile profiles/kenbiya.yml --url https://www.kenbiya.com/a
 - 対象サイトの正規アカウント
 - 対象データの取得・保存が利用規約・契約・権限上許可されていること
 - GitHub Actionsで動かす場合はRepository Secrets
-  - `KENBIYA_EMAIL`
-  - `KENBIYA_PASSWORD`
-  - `WEB_EXPORT_ACKNOWLEDGE_AUTHORIZED=true`
 - 検索結果URLまたは一覧URL
 - 対象サイトに合わせたYAMLプロファイル
 - 大量取得する場合は十分な低速設定
