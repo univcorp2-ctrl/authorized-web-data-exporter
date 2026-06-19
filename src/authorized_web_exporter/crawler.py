@@ -12,6 +12,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 
 from authorized_web_exporter.checkpoint import CheckpointStore
 from authorized_web_exporter.config import SiteProfile
+from authorized_web_exporter.investment_analysis import export_investment_analysis
 from authorized_web_exporter.models import CrawlError
 from authorized_web_exporter.parser import extract_detail_links, extract_next_links, parse_detail_page
 from authorized_web_exporter.robots import RobotsDeniedError, RobotsInspector
@@ -26,12 +27,16 @@ class GenericCrawler:
         username: str,
         password: str,
         console: Console | None = None,
+        generate_analysis: bool = True,
+        enable_api_comparison: bool = True,
     ) -> None:
         self.profile = profile
         self.output_dir = output_dir
         self.username = username
         self.password = password
         self.console = console or Console()
+        self.generate_analysis = generate_analysis
+        self.enable_api_comparison = enable_api_comparison
         self.state_dir = Path(".crawler-state") / profile.name
         self.checkpoint = CheckpointStore(self.state_dir / "checkpoint.json")
         self.detail_queue: deque[str] = deque()
@@ -73,6 +78,12 @@ class GenericCrawler:
                 await browser.close()
 
         export_records(self.output_dir, self.checkpoint.records, self.checkpoint.errors)
+        if self.generate_analysis:
+            export_investment_analysis(
+                self.output_dir,
+                self.checkpoint.records,
+                enable_api=self.enable_api_comparison,
+            )
         self.robots.write_report(self.output_dir / self.profile.robots.report_path)
         self.console.print(
             f"[green]Export completed:[/green] records={len(self.checkpoint.records)} "
