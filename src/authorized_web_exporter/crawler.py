@@ -12,6 +12,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 
 from authorized_web_exporter.checkpoint import CheckpointStore
 from authorized_web_exporter.config import SiteProfile
+from authorized_web_exporter.dashboard import write_dashboard
 from authorized_web_exporter.investment_analysis import export_investment_analysis
 from authorized_web_exporter.models import CrawlError
 from authorized_web_exporter.parser import extract_detail_links, extract_next_links, parse_detail_page
@@ -79,11 +80,13 @@ class GenericCrawler:
 
         export_records(self.output_dir, self.checkpoint.records, self.checkpoint.errors)
         if self.generate_analysis:
-            export_investment_analysis(
+            analysis = export_investment_analysis(
                 self.output_dir,
                 self.checkpoint.records,
                 enable_api=self.enable_api_comparison,
             )
+            dashboard_path = write_dashboard(self.output_dir / "dashboard", analysis.rows, analysis.summary)
+            self.console.print(f"[green]Dashboard written:[/green] {dashboard_path}")
         self.robots.write_report(self.output_dir / self.profile.robots.report_path)
         self.console.print(
             f"[green]Export completed:[/green] records={len(self.checkpoint.records)} "
