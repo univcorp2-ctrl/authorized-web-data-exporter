@@ -1,0 +1,86 @@
+name: "example-site"
+description: "Template profile for another authorized login site"
+login_url: "https://example.com/login"
+allowed_domains:
+  - "example.com"
+
+credential_env:
+  username: "EXAMPLE_USERNAME"
+  password: "EXAMPLE_PASSWORD"
+
+start_urls:
+  - "https://example.com/search"
+
+browser:
+  headless: true
+  navigation_timeout_ms: 45000
+  user_agent: null
+
+rate_limit:
+  request_delay_seconds: 5.0
+  request_jitter_seconds: 3.0
+  max_retries: 3
+
+limits:
+  max_pages: 100
+  max_items: null
+  save_html: false
+
+robots:
+  enabled: true
+  user_agent: "AuthorizedWebDataExporter"
+  check_login_url: true
+  enforce: true
+  fail_closed_on_error: false
+  report_path: "robots_report.txt"
+
+login_selectors:
+  username:
+    - "input[type='email']"
+    - "input[name='email']"
+    - "input[name='username']"
+    - "input[name='login']"
+  password:
+    - "input[type='password']"
+    - "input[name='password']"
+  submit:
+    - "button[type='submit']"
+    - "input[type='submit']"
+  logged_in:
+    - "a[href*='logout']"
+    - "text=Logout"
+    - "text=My Page"
+
+challenge_keywords:
+  - "captcha"
+  - "recaptcha"
+  - "one-time password"
+  - "two-factor"
+  - "mfa"
+
+discovery:
+  detail_link_selectors:
+    - "a[href*='detail']"
+    - "a[href*='item']"
+  detail_url_regexes:
+    - "/(?:detail|item)/[^\"'#? ]+"
+  next_page_selectors:
+    - "a[rel='next']"
+    - "a:has-text('Next')"
+  next_texts:
+    - "Next"
+    - ">"
+    - "›"
+
+extraction:
+  title_selectors:
+    - "h1"
+    - "meta[property='og:title']"
+    - "title"
+  fields:
+    - name: "price"
+      labels: ["Price"]
+      selectors: [".price"]
+    - name: "address"
+      labels: ["Address"]
+      selectors: [".address"]
