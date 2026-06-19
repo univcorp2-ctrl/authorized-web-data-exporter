@@ -1,0 +1,89 @@
+from __future__ import annotations
+
+import asyncio
+from pathlib import Path
+from typing import Annotated
+
+import typer
+from dotenv import load_dotenv
+from rich.console import Console
+
+from authorized_web_exporter.config import (
+    apply_runtime_overrides,
+    authorization_acknowledged,
+    load_credentials,
+    load_profile,
+)
+from authorized_web_exporter.crawler import GenericCrawler
+from authorized_web_exporter.robots import RobotsInspector
+
+app = typer.Typer(help="Generic authorized login-site data exporter.")
+console = Console()
+
+
+@app.command()
+def export(
+    profile: Annotated[Path, typer.Option("--profile", "-p", help="Path to site profile YAML.")] = Path("profiles/kenbiya.yml"),
+    output_dir: Annotated[Path | None, typer.Option("--output-dir", "-o", help="Override output directory.")] = None,
+    start_url: Annotated[list[str] | None, typer.Option("--start-url", help="Additional authorized list/search URL.")] = None,
+    username: Annotated[str | None, typer.Option(help="Login username. Prefer profile credential env/secret.")] = None,
+    password: Annotated[str | None, typer.Option(help="Login password. Prefer profile credential env/secret.")] = None,
+    max_pages: Annotated[int | None, typer.Option(help="Override max list/search pages.")] = None,
+    max_items: Annotated[int | None, typer.Option(help="Override max detail pages.")] = None,
+    headed: Annotated[bool, typer.Option(help="Run browser with UI for local debugging.")] = False,
+    save_html: Annotated[bool | None, typer.Option(help="Save raw HTML files.")] = None,
+    acknowledge_authorization: Annotated[
+        bool,
+        typer.Option(
+            "--acknowledge-authorization",
+            help="Confirm you are authorized to access and export the target data.",
+        ),
+    ] = False,
+) -> None:
+    """Login, crawl configured start URLs, and export detail records."""
+    load_dotenv()
+
+    if not authorization_acknowledged(acknowledge_authorization):
+        raise typer.BadParameter(
+            "Set WEB_EXPORT_ACKNOWLEDGE_AUTHORIZED=true or pass --acknowledge-authorization. "
+            "Use this only for data you are authorized to access and export."
+        )
+
+    site_profile, resolved_output = apply_runtime_overrides(
+        load_profile(profile),
+        start_urls=start_url,
+        output_dir=str(output_dir) if output_dir else None,
+        max_pages=max_pages,
+        max_items=max_items,
+        headed=headed,
+        save_html=save_html,
+    )
+    resolved_username, resolved_password = load_credentials(site_profile, username=username, password=password)
+    crawler = GenericCrawler(site_profile, Path(resolved_output), resolved_username, resolved_password, console=console)
+    asyncio.run(crawler.run())
+
+
+@app.command()
+def robots(
+    profile: Annotated[Path, typer.Option("--profile", "-p", help="Path to site profile YAML.")] = Path("profiles/kenbiya.yml"),
+    url: Annotated[list[str] | None, typer.Option("--url", help="URL to check. Can be repeated.")] = None,
+    output: Annotated[Path, typer.Option("--output", help="Report output path.")] = Path("outputs/robots_report.txt"),
+) -> None:
+    """Fetch robots.txt and write a detailed permission report."""
+    site_profile = load_profile(profile)
+    inspector = RobotsInspector(
+        user_agent=site_profile.robots.user_agent,
+        enforce=False,
+        fail_closed_on_error=site_profile.robots.fail_closed_on_error,
+    )
+    targets = list(url or []) or [site_profile.login_url, *site_profile.start_urls]
+    for target in targets:
+        decision = inspector.can_fetch(target)
+        status = "ALLOW" if decision.allowed else "DENY"
+        console.print(f"{status}: {target} ({decision.reason})")
+    inspector.write_report(output)
+    console.print(f"[green]robots report written:[/green] {output}")
+
+
+if __name__ == "__main__":
+    app()
