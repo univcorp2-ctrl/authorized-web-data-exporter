@@ -150,6 +150,17 @@ def parse_key_values(soup: BeautifulSoup) -> dict[str, str]:
     return pairs
 
 
+def apply_regex(value: str, pattern: str | None) -> str:
+    if not pattern:
+        return value
+    match = re.search(pattern, value)
+    if not match:
+        return value
+    if match.groups():
+        return clean_text(match.group(1))
+    return clean_text(match.group(0))
+
+
 def extract_from_selector(soup: BeautifulSoup, rule: FieldRule) -> str | None:
     for selector in rule.selectors:
         try:
@@ -167,17 +178,6 @@ def extract_from_selector(soup: BeautifulSoup, rule: FieldRule) -> str | None:
         if value:
             return apply_regex(value, rule.regex)
     return None
-
-
-def apply_regex(value: str, pattern: str | None) -> str:
-    if not pattern:
-        return value
-    match = re.search(pattern, value)
-    if not match:
-        return value
-    if match.groups():
-        return clean_text(match.group(1))
-    return clean_text(match.group(0))
 
 
 def pick_by_labels(key_values: dict[str, str], labels: list[str], regex: str | None = None) -> str | None:
