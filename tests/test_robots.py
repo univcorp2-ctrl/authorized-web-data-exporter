@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from authorized_web_exporter.robots import RobotsInspector, parse_robots_text
+from urllib.robotparser import RobotFileParser
+
+from authorized_web_exporter.robots import RobotsInspector, RobotsSnapshot, parse_robots_text, robots_url_for
 
 
 def test_parse_robots_text_groups_and_sitemaps() -> None:
@@ -25,8 +27,6 @@ def test_parse_robots_text_groups_and_sitemaps() -> None:
 def test_robots_inspector_can_fetch_with_injected_snapshot(tmp_path) -> None:  # noqa: ANN001
     inspector = RobotsInspector(user_agent="AuthorizedWebDataExporter", enforce=True)
     text = "User-agent: *\nDisallow: /private/\nAllow: /private/public/\n"
-    from urllib.robotparser import RobotFileParser
-    from authorized_web_exporter.robots import RobotsSnapshot, robots_url_for
 
     robots_url = robots_url_for("https://example.com/private/page")
     snapshot = RobotsSnapshot(robots_url=robots_url, status="HTTP 200", text=text)
@@ -41,5 +41,6 @@ def test_robots_inspector_can_fetch_with_injected_snapshot(tmp_path) -> None:  #
     assert inspector.can_fetch("https://example.com/private/public/page").allowed
     report = tmp_path / "robots_report.txt"
     inspector.write_report(report)
-    assert "Disallow" not in report.read_text(encoding="utf-8")
-    assert "disallow: /private/" in report.read_text(encoding="utf-8")
+    text_report = report.read_text(encoding="utf-8")
+    assert "disallow: /private/" in text_report
+    assert "ALLOW: https://example.com/private/public/page" in text_report
