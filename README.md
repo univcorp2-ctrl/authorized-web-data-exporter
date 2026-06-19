@@ -116,10 +116,26 @@ flowchart TD
 │   ├── kenbiya.yml
 │   └── example-site.yml
 ├── src/authorized_web_exporter/
-├── scripts/
+│   ├── cli.py
+│   ├── config.py
+│   ├── crawler.py
+│   ├── parser.py
+│   ├── robots.py
+│   ├── checkpoint.py
+│   ├── storage.py
+│   └── models.py
+├── scripts/build_runtime_profile.py
 ├── docs/
+│   ├── architecture.md
+│   ├── setup.md
+│   ├── robots.md
+│   ├── gpt-image-guidance-prompt.md
+│   ├── github-actions-permission-note.md
+│   ├── workflows/
+│   │   ├── ci.yml
+│   │   └── export.yml
+│   └── assets/architecture-overview.svg
 ├── tests/
-├── .github/workflows/
 └── .devcontainer/
 ```
 
@@ -166,17 +182,20 @@ web-export robots --profile profiles/kenbiya.yml --url https://www.kenbiya.com/a
 
 ---
 
-## GitHub Actionsで取得
+## GitHub Actionsについて
 
-Repository Secretsに以下を保存します。
+このリポジトリには、CI用とエクスポート用のworkflowテンプレートを以下に保存しています。
 
-| Secret名 | 値 |
-|---|---|
-| `KENBIYA_EMAIL` | 健美家ログインメールアドレス |
-| `KENBIYA_PASSWORD` | 健美家ログインパスワード |
-| `WEB_EXPORT_ACKNOWLEDGE_AUTHORIZED` | `true` |
+- `docs/workflows/ci.yml`
+- `docs/workflows/export.yml`
 
-`Actions > Authorized Web Export > Run workflow` を開き、`start_urls` に検索結果URLを1行ずつ入力して実行します。完了後、artifact `authorized-web-export-outputs` からCSV/Excel/JSON/TXT/robots_reportを取得できます。
+今回の自動コミット環境では、`.github/workflows/` へのファイル作成だけがGitHub API 404で拒否されました。これはアプリ本体・テスト・ドキュメントのpushとは別で、workflowファイルを書き込む権限がないGitHub tokenやGitHub Appで起きる典型的な制限です。
+
+workflow作成権限がある環境では、同じ内容を `.github/workflows/ci.yml` と `.github/workflows/export.yml` に置くと、以下が有効になります。
+
+- push / pull_request / workflow_dispatchでのlint・test CI
+- `workflow_dispatch` からの手動エクスポート
+- `authorized-web-export-outputs` artifactへのCSV/Excel/JSON/TXT/robots_report保存
 
 ---
 
