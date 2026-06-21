@@ -70,7 +70,8 @@ class GenericCrawler:
             page = await context.new_page()
 
             try:
-                await self.ensure_login(page, context, browser_state_path)
+                if self.profile.login_required:
+                    await self.ensure_login(page, context, browser_state_path)
                 await self.collect_detail_urls(page)
                 await self.collect_detail_pages(page)
             finally:
@@ -97,7 +98,7 @@ class GenericCrawler:
         if not self.profile.robots.enabled:
             return
         urls = list(self.profile.start_urls)
-        if self.profile.robots.check_login_url:
+        if self.profile.login_required and self.profile.robots.check_login_url and self.profile.login_url:
             urls.insert(0, self.profile.login_url)
         for url in urls:
             self.robots.assert_allowed(url)
@@ -174,6 +175,8 @@ class GenericCrawler:
         return "login" not in page.url.lower() and not has_password
 
     async def ensure_login(self, page: Page, context: BrowserContext, browser_state_path: Path) -> None:
+        if not self.profile.login_url:
+            raise RuntimeError("login_url is required for login profiles")
         await self.goto(page, self.profile.login_url)
         if await self.has_logged_in_signal(page):
             self.console.print("[green]Existing authenticated session is available.[/green]")
@@ -258,7 +261,7 @@ class GenericCrawler:
 
             try:
                 html = await self.goto(page, url)
-                if "login" in page.url.lower() and page.url != url:
+                if self.profile.login_required and "login" in page.url.lower() and page.url != url:
                     await self.ensure_login(page, page.context, self.state_dir / "browser_state.json")
                     html = await self.goto(page, url)
 
