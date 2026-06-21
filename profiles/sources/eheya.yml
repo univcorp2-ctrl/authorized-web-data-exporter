@@ -1,0 +1,22 @@
+name: eheya
+login_required: false
+description: いい部屋ネット 賃料相場補完プロファイル
+allowed_domains: [www.eheya.net, eheya.net]
+start_urls: [https://www.eheya.net/]
+browser: {headless: true, navigation_timeout_ms: 45000, user_agent: null}
+rate_limit: {request_delay_seconds: 5.0, request_jitter_seconds: 3.0, max_retries: 3}
+limits: {max_pages: 20, max_items: 200, save_html: false}
+robots: {enabled: true, user_agent: AuthorizedWebDataExporter, check_login_url: false, enforce: true, fail_closed_on_error: false, report_path: robots_report.txt}
+discovery:
+  detail_link_selectors: ["a[href*='rent']", "a[href*='chintai']", "a[href*='detail']", "a[href*='room']", "a[href*='bukken']"]
+  detail_url_regexes: ["/(?:rent|chintai|detail|room|bukken|property)/[^\"'# ]+"]
+  next_page_selectors: ["a[rel='next']", "a:has-text('次へ')", "a:has-text('次')"]
+  next_texts: ["次", "次へ", ">", "›", "»"]
+extraction:
+  title_selectors: ["h1", "h2", "meta[property='og:title']", "title"]
+  fields:
+    - {name: rent, labels: ["賃料", "家賃", "管理費"]}
+    - {name: address, labels: ["所在地", "住所"]}
+    - {name: station, labels: ["交通", "最寄り", "駅"]}
+    - {name: area, labels: ["専有面積", "面積"]}
+    - {name: built_year, labels: ["築年月", "築年数"]}
