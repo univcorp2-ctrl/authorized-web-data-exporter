@@ -1,0 +1,26 @@
+name: suumo
+login_required: false
+description: SUUMO売買・賃貸・RSS/新着監視向け公開HTMLプロファイル
+allowed_domains: [suumo.jp]
+start_urls:
+  - https://suumo.jp/
+browser: {headless: true, navigation_timeout_ms: 45000, user_agent: null}
+rate_limit: {request_delay_seconds: 4.0, request_jitter_seconds: 3.0, max_retries: 3}
+limits: {max_pages: 20, max_items: 200, save_html: false}
+robots: {enabled: true, user_agent: AuthorizedWebDataExporter, check_login_url: false, enforce: true, fail_closed_on_error: false, report_path: robots_report.txt}
+discovery:
+  detail_link_selectors: ["a[href*='bukken']", "a[href*='chuko']", "a[href*='tochi']", "a[href*='mansion']", "a[href*='kodate']", "a[href*='jj']"]
+  detail_url_regexes: ["/(?:bukken|chuko|tochi|mansion|kodate|jj)/[^\"'# ]+"]
+  next_page_selectors: ["a[rel='next']", "a:has-text('次へ')", "a:has-text('次')"]
+  next_texts: ["次", "次へ", ">", "›", "»"]
+extraction:
+  title_selectors: ["h1", "h2", "meta[property='og:title']", "title"]
+  fields:
+    - {name: price, labels: ["価格", "販売価格", "賃料"]}
+    - {name: address, labels: ["所在地", "住所"]}
+    - {name: station, labels: ["交通", "最寄り", "駅"]}
+    - {name: property_type, labels: ["種別", "物件種別"]}
+    - {name: building_area, labels: ["建物面積", "専有面積", "延床面積"]}
+    - {name: land_area, labels: ["土地面積", "敷地面積"]}
+    - {name: structure, labels: ["構造"]}
+    - {name: built_year, labels: ["築年月", "築年数", "竣工"]}
