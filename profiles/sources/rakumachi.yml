@@ -1,0 +1,29 @@
+name: rakumachi
+login_required: false
+description: 楽待 収益物件公開一覧監視プロファイル
+allowed_domains: [www.rakumachi.jp, rakumachi.jp]
+start_urls:
+  - https://www.rakumachi.jp/
+  - https://www.rakumachi.jp/syuuekibukken/area/prefecture/dimAll/
+browser: {headless: true, navigation_timeout_ms: 45000, user_agent: null}
+rate_limit: {request_delay_seconds: 5.0, request_jitter_seconds: 3.0, max_retries: 3}
+limits: {max_pages: 20, max_items: 200, save_html: false}
+robots: {enabled: true, user_agent: AuthorizedWebDataExporter, check_login_url: false, enforce: true, fail_closed_on_error: false, report_path: robots_report.txt}
+discovery:
+  detail_link_selectors: ["a[href*='syuuekibukken']", "a[href*='property']", "a[href*='bukken']", "a[href*='detail']"]
+  detail_url_regexes: ["/(?:syuuekibukken|property|bukken|detail)/[^\"'# ]+"]
+  next_page_selectors: ["a[rel='next']", "a:has-text('次へ')", "a:has-text('次')"]
+  next_texts: ["次", "次へ", ">", "›", "»"]
+extraction:
+  title_selectors: ["h1", "h2", "meta[property='og:title']", "title"]
+  fields:
+    - {name: price, labels: ["価格", "販売価格", "物件価格"]}
+    - {name: gross_yield, labels: ["利回り", "表面利回り", "想定利回り"]}
+    - {name: annual_income, labels: ["年間収入", "想定年収", "満室時年収"]}
+    - {name: address, labels: ["所在地", "住所"]}
+    - {name: station, labels: ["交通", "最寄り", "駅"]}
+    - {name: property_type, labels: ["種別", "物件種別"]}
+    - {name: building_area, labels: ["建物面積", "専有面積", "延床面積"]}
+    - {name: land_area, labels: ["土地面積", "敷地面積"]}
+    - {name: structure, labels: ["構造"]}
+    - {name: built_year, labels: ["築年月", "築年数", "竣工"]}
