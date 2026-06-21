@@ -1,0 +1,505 @@
+version: 1
+name: japan-real-estate-investment-source-catalog
+description: 日本の不動産投資向け情報収集ソース一覧。API、公開HTML、通知/RSS、ログインサイト、CSV/Excel系を同一カタログで管理する。
+columns:
+  - site
+  - category
+  - url
+  - ease
+  - monitoring_fit
+  - priority
+  - source_type
+  - profile
+  - data_targets
+  - notes
+sources:
+  - site: 国交省 不動産情報ライブラリ
+    category: official_api
+    url: https://www.reinfolib.mlit.go.jp/
+    ease: A
+    monitoring_fit: ◎
+    priority: S
+    source_type: official_api
+    profile: builtin_reinfolib_api
+    data_targets: [取引価格, 成約価格, 地価公示, 都市計画, 防災情報, 周辺施設]
+    notes: 公式API。相場・地価・成約価格の土台。XIT001/XIT002などを分析エンジンで利用。
+  - site: SUUMO
+    category: portal_general
+    url: https://suumo.jp/
+    ease: A-〜B
+    monitoring_fit: ◎
+    priority: S
+    source_type: public_html_rss_mail
+    profile: profiles/sources/suumo.yml
+    data_targets: [新着物件, 売買物件, 賃貸物件, 価格, 賃料, 駅徒歩, 面積, 築年, RSS, 新着メール]
+    notes: 新着メール・RSS導線あり。まず通知/RSSと公開一覧監視を併用。
+  - site: LIFULL HOME'S
+    category: portal_general
+    url: https://www.homes.co.jp/
+    ease: B〜C
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/lifull-homes.yml
+    data_targets: [売買物件, 賃貸物件, 家賃相場, 価格相場, 不動産アーカイブ]
+    notes: 情報量が多い。投資判断補完、家賃相場、アーカイブ、プライスマップ候補。
+  - site: LIFULL HOME'S 不動産投資
+    category: portal_investment
+    url: https://toushi.homes.co.jp/
+    ease: B〜C
+    monitoring_fit: ◎
+    priority: S
+    source_type: public_html
+    profile: profiles/sources/lifull-homes-investment.yml
+    data_targets: [収益物件, 価格, 利回り, 所在地, 構造, 築年, 会社]
+    notes: 投資用として重要。健美家と同じLIFULL系として相互補完。
+  - site: at home
+    category: portal_general
+    url: https://www.athome.co.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/athome.yml
+    data_targets: [売買, 賃貸, 事業用, 価格, 賃料, 駅徒歩, 面積, 会社]
+    notes: 投資・居住用ともに情報量あり。地域補完に有効。
+  - site: 投資アットホーム
+    category: portal_investment
+    url: https://toushi-athome.jp/
+    ease: B
+    monitoring_fit: ◎
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/toushi-athome.yml
+    data_targets: [投資物件, 収益物件, 利回り, 価格, 所在地, 面積]
+    notes: 投資用アットホーム。収益物件の横断補完。
+  - site: Yahoo!不動産
+    category: portal_general
+    url: https://realestate.yahoo.co.jp/
+    ease: A-〜B
+    monitoring_fit: ◎
+    priority: S
+    source_type: public_html
+    profile: profiles/sources/yahoo-realestate.yml
+    data_targets: [中古マンション, 中古戸建, 土地, 賃貸, 価格, 間取り, 築年, 評判, 相場]
+    notes: 公開HTMLで地域別・条件別の監視に向く。
+  - site: Nifty不動産
+    category: portal_aggregator
+    url: https://myhome.nifty.com/
+    ease: A-〜B
+    monitoring_fit: ◎
+    priority: S
+    source_type: public_html_js
+    profile: profiles/sources/nifty-realestate.yml
+    data_targets: [横断検索, 売買, 賃貸, 掲載元, 価格, 賃料, 面積, 築年]
+    notes: 横断検索向き。一部JavaScript前提の可能性あり。
+  - site: goo住宅・不動産
+    category: portal_aggregator
+    url: https://house.goo.ne.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/goo-house.yml
+    data_targets: [売買, 賃貸, 投資, 家賃相場, 価格, 利回り]
+    notes: 補助的な横断チェック向き。
+  - site: 楽待
+    category: portal_investment
+    url: https://www.rakumachi.jp/
+    ease: B
+    monitoring_fit: ◎
+    priority: S
+    source_type: public_html_login_optional
+    profile: profiles/sources/rakumachi.yml
+    data_targets: [一棟マンション, 一棟アパート, 区分, ビル, 価格, 利回り, 想定年収, 評価額]
+    notes: 一棟・区分・投資用物件の監視に強い。
+  - site: 健美家
+    category: portal_investment
+    url: https://www.kenbiya.com/
+    ease: B
+    monitoring_fit: ◎
+    priority: S
+    source_type: login_public_hybrid
+    profile: profiles/kenbiya.yml
+    data_targets: [投資物件, 価格, 利回り, 相場レポート, 会社, 担当者]
+    notes: 投資用物件・相場レポート系。ログイン取得プロファイル作成済み。
+  - site: 不動産投資連合隊
+    category: portal_investment
+    url: https://www.rals.co.jp/invest/
+    ease: A-〜B
+    monitoring_fit: ◎
+    priority: S
+    source_type: public_html
+    profile: profiles/sources/rals-invest.yml
+    data_targets: [地方投資物件, 一棟, 区分, 価格, 利回り, 所在地, WEB面談可]
+    notes: 地方・一棟・投資用の取得候補として有力。
+  - site: RALS / CBIZ系
+    category: portal_local_business
+    url: https://fudosanlist.cbiz.ne.jp/
+    ease: A-〜B
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/cbiz-invest.yml
+    data_targets: [地方投資物件, 事業用, テナント, 価格, 利回り]
+    notes: 地方投資物件・事業用物件の補助ソース。
+  - site: 三井のリハウス
+    category: major_broker
+    url: https://www.rehouse.co.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/mitsui-rehouse.yml
+    data_targets: [中古マンション, 戸建, 土地, 価格, 物件URL, 仲介店舗]
+    notes: 公開一覧あり。大手仲介の価格・新着監視候補。
+  - site: 三井不動産リアルティPRO
+    category: major_broker_investment
+    url: https://www.rehouse.co.jp/biz/
+    ease: B
+    monitoring_fit: ◎
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/mitsui-rehouse-pro.yml
+    data_targets: [投資用, 事業用, ビル, 土地, 価格, 物件URL]
+    notes: 投資・事業用監視候補。URL監視型で扱う。
+  - site: 住友不動産販売 / ステップ
+    category: major_broker
+    url: https://www.stepon.co.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html_mail
+    profile: profiles/sources/sumitomo-step.yml
+    data_targets: [中古マンション, 戸建, 土地, 投資用, 新着メール, 価格]
+    notes: 公開一覧・新着メール系があり、監視候補。
+  - site: 住友不動産ステップPRO
+    category: major_broker_investment
+    url: https://www.stepon.co.jp/pro/
+    ease: B
+    monitoring_fit: ◎
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/sumitomo-step-pro.yml
+    data_targets: [投資用, 事業用, 収益物件, ビル, 価格, 利回り]
+    notes: 事業用・投資用監視候補。
+  - site: 東急リバブル
+    category: major_broker
+    url: https://www.livable.co.jp/
+    ease: B〜C
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/tokyu-livable.yml
+    data_targets: [売買, 事業用, 投資用, 価格, 店舗, 成約済み変動]
+    notes: 物件情報は変動・成約済み化するためURL監視向き。
+  - site: ノムコム
+    category: major_broker
+    url: https://www.nomu.com/
+    ease: B〜C
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/nomu.yml
+    data_targets: [中古マンション, 戸建, 土地, 価格, 物件URL]
+    notes: 技術的には公開一覧監視候補。商用加工利用は別途設計。
+  - site: ノムコム・プロ
+    category: major_broker_investment
+    url: https://www.nomu.com/pro/
+    ease: B〜C
+    monitoring_fit: ◎
+    priority: S
+    source_type: public_html
+    profile: profiles/sources/nomu-pro.yml
+    data_targets: [収益物件, 事業用, 一棟, ビル, 価格, 利回り]
+    notes: 投資用として重要。URL・価格変更監視に向く。
+  - site: 三菱UFJ不動産販売 / 住まい1
+    category: major_broker
+    url: https://www.sumai1.com/
+    ease: A-〜B
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/sumai1.yml
+    data_targets: [売買, 土地, 戸建, マンション, 価格, 物件URL]
+    notes: 公開HTML一覧の監視候補。
+  - site: 三菱地所の住まいリレー
+    category: major_broker
+    url: https://www.mec-h.com/
+    ease: A-〜B
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/mec-h.yml
+    data_targets: [マンション, 戸建, 土地, 価格, 物件URL]
+    notes: 公開検索ページあり。中規模監視候補。
+  - site: 大成有楽不動産販売
+    category: major_broker
+    url: https://www.ietan.jp/
+    ease: B暫定
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/ietan.yml
+    data_targets: [中古マンション, 戸建, 土地, 価格, 物件URL]
+    notes: 追加検証対象。大手仲介系なのでURL監視型。
+  - site: みずほ不動産販売
+    category: major_broker
+    url: https://www.mizuho-re.co.jp/
+    ease: B暫定
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/mizuho-re.yml
+    data_targets: [売買, 投資用, 土地, 事業用, 価格, 物件URL]
+    notes: 新着・価格変更監視向き。
+  - site: 住友林業ホームサービス
+    category: major_broker
+    url: https://www.suminavi.com/
+    ease: B暫定
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/suminavi.yml
+    data_targets: [売買, 戸建, 土地, マンション, 価格, 物件URL]
+    notes: 仲介サイトとして監視対象。
+  - site: 三井住友トラスト不動産
+    category: major_broker
+    url: https://smtrc.jp/
+    ease: B暫定
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/smtrc.yml
+    data_targets: [売買, 土地, 相続, 富裕層物件, 価格, 物件URL]
+    notes: 富裕層・相続・土地系の発掘候補。
+  - site: 大京穴吹不動産
+    category: major_broker
+    url: https://www.daikyo-anabuki.co.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/daikyo-anabuki.yml
+    data_targets: [区分マンション, 価格, 管理, 築年, 物件URL]
+    notes: 区分マンション監視に向く。
+  - site: センチュリー21
+    category: franchise_broker
+    url: https://www.century21.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/century21.yml
+    data_targets: [加盟店横断, 地方物件, 戸建, 土地, マンション, 価格]
+    notes: 地方・戸建て・土地補完。
+  - site: ピタットハウス
+    category: franchise_broker
+    url: https://www.pitat.com/
+    ease: B
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/pitat.yml
+    data_targets: [居住用, 投資用, 賃貸, 売買, 店舗, 価格]
+    notes: 居住用・投資用の補完。
+  - site: ハトマークサイト
+    category: industry_association
+    url: https://www.hatomarksite.com/
+    ease: B
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/hatomark.yml
+    data_targets: [地場業者, 売買, 賃貸, 土地, 価格, 店舗]
+    notes: 地場業者情報の拾い上げ候補。
+  - site: 不動産ジャパン
+    category: industry_association
+    url: https://www.fudousan.or.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: A
+    source_type: public_html
+    profile: profiles/sources/fudousan-japan.yml
+    data_targets: [業界団体系, 売買, 賃貸, 不動産会社, 価格]
+    notes: 業界団体系。網羅補助。
+  - site: REINS
+    category: restricted_industry_system
+    url: https://system.reins.jp/
+    ease: D
+    monitoring_fit: ×
+    priority: X
+    source_type: excluded
+    profile: null
+    data_targets: [成約情報, 流通物件]
+    notes: 原則スクレイピング対象外。外部APIなし・二次利用制限情報あり。分析では公的APIや公開情報で代替。
+  - site: 国税庁 路線価図・評価倍率表
+    category: official_web
+    url: https://www.rosenka.nta.go.jp/
+    ease: C
+    monitoring_fit: ○
+    priority: A
+    source_type: official_web_manual_or_fetch
+    profile: profiles/sources/nta-rosenka.yml
+    data_targets: [路線価, 評価倍率, 土地評価補完]
+    notes: 積算評価・担保評価補完。住所からの自動突合は別途ジオコーディングが必要。
+  - site: ハザードマップポータルサイト
+    category: official_web
+    url: https://disaportal.gsi.go.jp/
+    ease: C
+    monitoring_fit: ◎
+    priority: S
+    source_type: official_web_api_like
+    profile: profiles/sources/hazard-gsi.yml
+    data_targets: [洪水, 土砂災害, 津波, 高潮, 地震, 地図]
+    notes: 仕入れ判定リスク補完の中核。
+  - site: 地理院地図
+    category: official_web
+    url: https://maps.gsi.go.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: A
+    source_type: official_web
+    profile: profiles/sources/gsi-maps.yml
+    data_targets: [地形, 標高, 地図, 空中写真]
+    notes: 災害・立地・高低差確認。
+  - site: e-Stat
+    category: official_api
+    url: https://www.e-stat.go.jp/
+    ease: A-〜B
+    monitoring_fit: ◎
+    priority: A
+    source_type: official_api
+    profile: builtin_estat_api_future
+    data_targets: [人口, 世帯, 国勢調査, 商圏, 年齢構成]
+    notes: 人口動態・出口需要・賃貸需要の補完。
+  - site: RESAS
+    category: official_api
+    url: https://resas.go.jp/
+    ease: A-〜B
+    monitoring_fit: ◎
+    priority: A
+    source_type: official_api
+    profile: builtin_resas_api_future
+    data_targets: [人口, 地域経済, 産業, 通勤通学, 観光]
+    notes: 地方投資判断の補完。
+  - site: BIT 不動産競売物件情報
+    category: auction
+    url: https://www.bit.courts.go.jp/
+    ease: C
+    monitoring_fit: ◎
+    priority: A
+    source_type: public_html_pdf
+    profile: profiles/sources/bit-court-auction.yml
+    data_targets: [競売, 事件番号, 基準価額, 入札期間, 物件明細, PDF]
+    notes: 競売仕入れ候補。PDF解析を別途拡張可能。
+  - site: KSI官公庁オークション
+    category: public_auction
+    url: https://kankocho.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/ksi-auction.yml
+    data_targets: [公売, 不動産公売, 入札, 価格]
+    notes: 公売・自治体売却案件補完。
+  - site: 981.jp
+    category: auction_support
+    url: https://981.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/981.yml
+    data_targets: [競売, 事件番号, 価格, 地域]
+    notes: 競売情報検索・落札サポート系。
+  - site: CBRE
+    category: commercial_real_estate
+    url: https://www.cbre.co.jp/properties
+    ease: B
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/cbre.yml
+    data_targets: [オフィス, 倉庫, 物流, 店舗, 事業用, 賃料, 売買]
+    notes: 事業用・商業用不動産の補完。
+  - site: JLL物件情報
+    category: commercial_real_estate
+    url: https://www.jllproperty.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: B
+    source_type: public_html
+    profile: profiles/sources/jll-property.yml
+    data_targets: [オフィス, 物流, 商業, 賃貸, 売買]
+    notes: 商業用・事業用の補完。
+  - site: いい部屋ネット
+    category: rental_portal
+    url: https://www.eheya.net/
+    ease: B
+    monitoring_fit: ○
+    priority: C
+    source_type: public_html
+    profile: profiles/sources/eheya.yml
+    data_targets: [賃貸, 家賃, 駅徒歩, 面積, 築年]
+    notes: 家賃相場補完。
+  - site: CHINTAI
+    category: rental_portal
+    url: https://www.chintai.net/
+    ease: B
+    monitoring_fit: ○
+    priority: C
+    source_type: public_html
+    profile: profiles/sources/chintai.yml
+    data_targets: [賃貸, 家賃, 駅徒歩, 面積, 築年]
+    notes: 家賃相場補完。
+  - site: アパマンショップ
+    category: rental_portal
+    url: https://www.apamanshop.com/
+    ease: B
+    monitoring_fit: ○
+    priority: C
+    source_type: public_html
+    profile: profiles/sources/apamanshop.yml
+    data_targets: [賃貸, 家賃, 駅徒歩, 面積, 築年]
+    notes: 家賃相場補完。
+  - site: スモッカ
+    category: rental_aggregator
+    url: https://smocca.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: C
+    source_type: public_html
+    profile: profiles/sources/smocca.yml
+    data_targets: [賃貸, 掲載元, 家賃, 駅徒歩]
+    notes: 賃貸横断補完。
+  - site: ホームアドパーク
+    category: rental_portal
+    url: https://home.adpark.co.jp/
+    ease: B
+    monitoring_fit: ○
+    priority: C
+    source_type: public_html
+    profile: profiles/sources/adpark.yml
+    data_targets: [賃貸, 売買, 価格, 賃料]
+    notes: 補完ソース。
+  - site: オウチーノ
+    category: portal_general
+    url: https://www.o-uccino.com/
+    ease: B
+    monitoring_fit: ○
+    priority: C
+    source_type: public_html
+    profile: profiles/sources/ouchiino.yml
+    data_targets: [売買, 賃貸, 価格, 物件URL]
+    notes: 補完ソース。
+  - site: スマイティ
+    category: portal_general
+    url: https://sumaity.com/
+    ease: B
+    monitoring_fit: ○
+    priority: C
+    source_type: public_html
+    profile: profiles/sources/sumaity.yml
+    data_targets: [賃貸, 売買, 相場, 口コミ]
+    notes: 家賃・相場補完。
