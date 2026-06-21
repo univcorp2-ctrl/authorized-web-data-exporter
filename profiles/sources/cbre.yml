@@ -1,0 +1,21 @@
+name: cbre
+login_required: false
+description: CBRE 事業用・商業用不動産監視プロファイル
+allowed_domains: [www.cbre.co.jp, cbre.co.jp]
+start_urls: [https://www.cbre.co.jp/properties]
+browser: {headless: true, navigation_timeout_ms: 45000, user_agent: null}
+rate_limit: {request_delay_seconds: 5.0, request_jitter_seconds: 3.0, max_retries: 3}
+limits: {max_pages: 20, max_items: 200, save_html: false}
+robots: {enabled: true, user_agent: AuthorizedWebDataExporter, check_login_url: false, enforce: true, fail_closed_on_error: false, report_path: robots_report.txt}
+discovery:
+  detail_link_selectors: ["a[href*='properties']", "a[href*='property']", "a[href*='office']", "a[href*='logistics']", "a[href*='retail']"]
+  detail_url_regexes: ["/(?:properties|property|office|logistics|retail|warehouse|sale|lease)/[^\"'# ]+"]
+  next_page_selectors: ["a[rel='next']", "a:has-text('Next')", "a:has-text('次')"]
+  next_texts: ["Next", "次", "次へ", ">", "›", "»"]
+extraction:
+  title_selectors: ["h1", "h2", "meta[property='og:title']", "title"]
+  fields:
+    - {name: price, labels: ["価格", "賃料", "Rent", "Price"]}
+    - {name: address, labels: ["所在地", "住所", "Location", "Address"]}
+    - {name: property_type, labels: ["用途", "種別", "Type"]}
+    - {name: area, labels: ["面積", "Area"]}
