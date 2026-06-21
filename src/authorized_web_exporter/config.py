@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class CredentialEnv(BaseModel):
@@ -77,9 +77,10 @@ class ExtractionSettings(BaseModel):
 class SiteProfile(BaseModel):
     name: str
     description: str | None = None
-    login_url: str
+    login_required: bool = True
+    login_url: str | None = None
     allowed_domains: list[str]
-    credential_env: CredentialEnv
+    credential_env: CredentialEnv | None = None
     start_urls: list[str] = Field(default_factory=list)
     browser: BrowserSettings = Field(default_factory=BrowserSettings)
     rate_limit: RateLimitSettings = Field(default_factory=RateLimitSettings)
@@ -94,6 +95,15 @@ class SiteProfile(BaseModel):
     @classmethod
     def strip_start_urls(cls, value: list[str]) -> list[str]:
         return [url.strip() for url in value if url and url.strip() and "REPLACE_WITH" not in url]
+
+    @model_validator(mode="after")
+    def validate_login_settings(self) -> "SiteProfile":
+        if self.login_required:
+            if not self.login_url:
+                raise ValueError("login_url is required when login_required is true")
+            if self.credential_env is None:
+                raise ValueError("credential_env is required when login_required is true")
+        return self
 
 
 def load_profile(path: str | Path) -> SiteProfile:
@@ -138,6 +148,10 @@ def apply_runtime_overrides(
 
 
 def load_credentials(profile: SiteProfile, username: str | None = None, password: str | None = None) -> tuple[str, str]:
+    if not profile.login_required:
+        return "", ""
+    if profile.credential_env is None:
+        raise RuntimeError("credential_env is required for login profiles")
     resolved_username = username or os.getenv(profile.credential_env.username)
     resolved_password = password or os.getenv(profile.credential_env.password)
     if not resolved_username or not resolved_password:
