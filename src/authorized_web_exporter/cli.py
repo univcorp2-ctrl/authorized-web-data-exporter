@@ -8,6 +8,7 @@ import typer
 from dotenv import load_dotenv
 from rich.console import Console
 
+from authorized_web_exporter.batch import run_batch
 from authorized_web_exporter.config import (
     apply_runtime_overrides,
     authorization_acknowledged,
@@ -19,7 +20,7 @@ from authorized_web_exporter.dashboard import load_dashboard_rows_from_workbook,
 from authorized_web_exporter.investment_analysis import export_investment_analysis, load_records_jsonl
 from authorized_web_exporter.robots import RobotsInspector
 
-app = typer.Typer(help="Generic authorized login-site data exporter.")
+app = typer.Typer(help="Generic authorized login-site and public real-estate data exporter.")
 console = Console()
 
 
@@ -44,7 +45,7 @@ def export(
         ),
     ] = False,
 ) -> None:
-    """Login, crawl configured start URLs, export detail records, and generate analysis workbook/dashboard."""
+    """Crawl one configured source, export records, and generate analysis/dashboard."""
     load_dotenv()
 
     if not authorization_acknowledged(acknowledge_authorization):
@@ -73,6 +74,39 @@ def export(
         enable_api_comparison=not skip_api_comparison,
     )
     asyncio.run(crawler.run())
+
+
+@app.command("batch")
+def batch_command(
+    profile_dir: Annotated[Path, typer.Option("--profile-dir", help="Directory containing source profile YAML files.")] = Path("profiles/sources"),
+    output_root: Annotated[Path, typer.Option("--output-root", "-o", help="Output root directory.")] = Path("outputs/batch"),
+    include: Annotated[list[str] | None, typer.Option("--include", help="Profile stem to include. Repeatable.")] = None,
+    skip_analysis: Annotated[bool, typer.Option(help="Skip combined investment analysis generation.")] = False,
+    skip_api_comparison: Annotated[bool, typer.Option(help="Do not call MLIT Real Estate Information Library API.")] = False,
+    acknowledge_authorization: Annotated[
+        bool,
+        typer.Option(
+            "--acknowledge-authorization",
+            help="Confirm you are authorized to access and export the target data.",
+        ),
+    ] = False,
+) -> None:
+    """Crawl many configured sources and merge them into one combined analysis/dashboard."""
+    load_dotenv()
+    if not authorization_acknowledged(acknowledge_authorization):
+        raise typer.BadParameter(
+            "Set WEB_EXPORT_ACKNOWLEDGE_AUTHORIZED=true or pass --acknowledge-authorization. "
+            "Use this only for data you are authorized to access and export."
+        )
+    summary = run_batch(
+        profile_dir=profile_dir,
+        output_root=output_root,
+        include=include,
+        generate_analysis=not skip_analysis,
+        enable_api_comparison=not skip_api_comparison,
+        console=console,
+    )
+    console.print(f"[green]batch completed:[/green] records={summary['records_total']} output={output_root}")
 
 
 @app.command("analyze")
@@ -123,8 +157,10 @@ def robots(
         enforce=False,
         fail_closed_on_error=site_profile.robots.fail_closed_on_error,
     )
-    targets = list(url or []) or [site_profile.login_url, *site_profile.start_urls]
+    targets = list(url or []) or ([site_profile.login_url] if site_profile.login_url else []) + site_profile.start_urls
     for target in targets:
+        if not target:
+            continue
         decision = inspector.can_fetch(target)
         status = "ALLOW" if decision.allowed else "DENY"
         console.print(f"{status}: {target} ({decision.reason})")
