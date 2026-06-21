@@ -1,0 +1,18 @@
+name: gsi-maps
+login_required: false
+description: 地理院地図 地形・標高・空中写真参照用プロファイル
+allowed_domains: [maps.gsi.go.jp, www.gsi.go.jp]
+start_urls: [https://maps.gsi.go.jp/]
+browser: {headless: true, navigation_timeout_ms: 45000, user_agent: null}
+rate_limit: {request_delay_seconds: 5.0, request_jitter_seconds: 3.0, max_retries: 3}
+limits: {max_pages: 10, max_items: 100, save_html: false}
+robots: {enabled: true, user_agent: AuthorizedWebDataExporter, check_login_url: false, enforce: true, fail_closed_on_error: false, report_path: robots_report.txt}
+discovery:
+  detail_link_selectors: ["a[href*='map']", "a[href*='photo']", "a[href*='tile']", "a[href*='gsi']"]
+  detail_url_regexes: ["/(?:map|photo|tile|gsi|std)/[^\"'# ]*"]
+  next_page_selectors: ["a[rel='next']", "a:has-text('次へ')", "a:has-text('次')"]
+  next_texts: ["次", "次へ", ">", "›", "»"]
+extraction:
+  title_selectors: ["h1", "h2", "title"]
+  fields:
+    - {name: terrain, labels: ["地形", "標高", "空中写真"]}
